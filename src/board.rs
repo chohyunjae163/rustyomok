@@ -15,3 +15,14 @@ pub struct Coordinate {
     pub x: usize,
     pub y: usize,
 }
+
+pub enum Direction {
+    TopLeft,
+    Top,
+    TopRight,
+    Left,
+    Right,
+    BottomLeft,
+    Bottom,
+    BottomRight,
+}
