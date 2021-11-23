@@ -1,4 +1,6 @@
-#[derive(PartialEq, Copy, Clone)]
+use std::fmt;
+
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum StoneColor {
     None,
     White,
@@ -6,8 +8,8 @@ pub enum StoneColor {
 }
 
 pub struct Coordinate {
-    pub x: usize,
-    pub y: usize,
+    pub x: i8,
+    pub y: i8,
 }
 
 //(0,0) is center

@@ -1,5 +1,5 @@
 use crate::board::{Coordinate, StoneColor, DIRECTIONS};
-
+use std::convert::TryFrom;
 pub struct GameEngine {
     board: [[StoneColor; 15]; 15],
     current_turn: StoneColor,
@@ -15,7 +15,9 @@ impl GameEngine {
     }
 
     pub fn place_stone(&mut self, stone_color: StoneColor, coord: Coordinate) -> bool {
-        if self.board[coord.x][coord.y] != StoneColor::None {
+        let row = coord.x as usize;
+        let column = coord.y as usize;
+        if self.board[row][column] != StoneColor::None {
             return false;
         }
 
@@ -24,8 +26,8 @@ impl GameEngine {
         }
 
         match stone_color {
-            StoneColor::White => self.board[coord.x][coord.y] = StoneColor::White,
-            StoneColor::Black => self.board[coord.x][coord.y] = StoneColor::Black,
+            StoneColor::White => self.board[row][column] = StoneColor::White,
+            StoneColor::Black => self.board[row][column] = StoneColor::Black,
             StoneColor::None => return false,
         }
 
@@ -42,10 +44,14 @@ impl GameEngine {
         for dir in DIRECTIONS {
             let mut inarow = 0;
             for i in 0..5 {
-                //TODO 예외사항처리
-                let x = coord.x + dir.0 as usize + i;
-                let y = coord.y + dir.1 as usize + i;
-                if self.board[x][y] == self.current_turn {
+                //FIXME: there is a bug!!!
+                let x_dir = dir.0;
+                let y_dir = dir.1;
+                let x = coord.x + x_dir * i;
+                let y = coord.y + y_dir * i;
+                let row = x as usize;
+                let col = y as usize;
+                if self.board[row][col] == StoneColor::Black {
                     inarow += 1;
                 }
             }
@@ -63,5 +69,39 @@ impl GameEngine {
                 *col = StoneColor::None;
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::board::Coordinate;
+    use super::super::board::StoneColor;
+    use super::GameEngine;
+    #[test]
+    fn test_board_Empty() {
+        let engine = GameEngine::new();
+        for row in engine.board.iter() {
+            for col in row.iter() {
+                assert_eq!(*col, StoneColor::None);
+            }
+        }
+    }
+    #[test]
+    fn test_place_stone() {
+        let mut engine = GameEngine::new();
+        engine.place_stone(StoneColor::Black, Coordinate { x: 8, y: 5 });
+        assert_eq!(engine.board[8][5], StoneColor::Black);
+    }
+
+    #[test]
+    fn test_gameend_check() {
+        let mut engine = GameEngine::new();
+        engine.place_stone(StoneColor::Black, Coordinate { x: 4, y: 5 });
+        engine.place_stone(StoneColor::Black, Coordinate { x: 5, y: 5 });
+        engine.place_stone(StoneColor::Black, Coordinate { x: 6, y: 5 });
+        engine.place_stone(StoneColor::Black, Coordinate { x: 7, y: 5 });
+        engine.place_stone(StoneColor::Black, Coordinate { x: 8, y: 5 });
+        let game_end = engine.check_gameend(Coordinate { x: 8, y: 5 });
+        assert_eq!(game_end, true);
     }
 }
